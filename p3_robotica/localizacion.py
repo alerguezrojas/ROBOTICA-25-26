@@ -55,6 +55,11 @@ def mostrar(objetivos,ideal,trayectoria):
   plt.plot(objT[0],objT[1],'-.o')
   plt.show()
 
+
+# error posicion y error orientacion
+
+
+# añadir parametro paso
 def localizacion(balizas, real, ideal, centro, radio, mostrar=False):
   # Buscar la localización más probable del robot, a partir de su sistema
   # sensorial, dentro de una región cuadrada de centro "centro" y lado "2*radio".
@@ -129,6 +134,8 @@ random.seed(time.time())
 tic = time.time()
 
 # Localización inicial
+# llamar a funcion de localizacion para buqueda inicial
+# buscar en la region concreta e intentar que sea lo mas rapida posible
 
 tray_ideal = [ideal.pose()]  # Trayectoria percibida
 
@@ -154,9 +161,10 @@ for punto in objetivos:
       real.move_triciclo(w,v,LONGITUD)
     tray_real.append(real.pose())
 
-    # Decidir nueva localización ⇒ nuevo ideal
 
     tray_ideal.append(ideal.pose())
+
+    # Decidir nueva localización ⇒ nuevo ideal
 
     if MOSTRAR:
       mostrar(objetivos, tray_ideal, tray_real)  # Representación gráfica
