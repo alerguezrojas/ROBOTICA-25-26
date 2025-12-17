@@ -57,16 +57,39 @@ def mostrar(objetivos,ideal,trayectoria):
 
 
 # error posicion y error orientacion
+def errores(real, ideal):
+  # Calcular error de posición y orientación entre robot real e ideal
+  e_pos = distancia(real.pose(), ideal.pose())
+  e_ori = real.pose()[2] - ideal.pose()[2]
+  while e_ori >  pi: e_ori -= 2*pi
+  while e_ori < -pi: e_ori += 2*pi
+  return e_pos, abs(e_ori)
 
 
 # añadir parametro paso
-def localizacion(balizas, real, ideal, centro, radio, mostrar=False):
+def localizacion(balizas, real, ideal, centro, radio, step=0.1, mostrar=False):
   # Buscar la localización más probable del robot, a partir de su sistema
   # sensorial, dentro de una región cuadrada de centro "centro" y lado "2*radio".
-
-
-
-
+  imagen = []
+  min_error = float('inf')
+  best_pose = ideal.pose()
+  
+  medida_real = real.senseDistance(balizas)
+  
+  for y in np.arange(centro[1]-radio, centro[1]+radio, step):
+    fila = []
+    for x in np.arange(centro[0]-radio, centro[0]+radio, step):
+      virtual = ideal.copy()
+      virtual.set(x, y, ideal.orientation)
+      medida_virtual = virtual.senseDistance(balizas)
+      error = np.linalg.norm(np.subtract(medida_real, medida_virtual))
+      fila.append(error)
+      if error < min_error:
+        min_error = error
+        best_pose = [x, y, ideal.orientation]
+    imagen.append(fila)
+    
+  ideal.set(*best_pose)
 
   if mostrar:
     plt.figure('Localizacion')
@@ -111,6 +134,9 @@ if len(sys.argv)<2 or int(sys.argv[1])<0 or int(sys.argv[1])>=len(trayectorias):
   sys.exit(f"{sys.argv[0]} <indice entre 0 y {len(trayectorias)-1}>")
 objetivos = trayectorias[int(sys.argv[1])]
 
+# Definición de balizas:
+balizas = [[0,0], [0,4], [4,0], [4,4]]
+
 # Definición de constantes:
 EPSILON = .1                # Umbral de distancia
 V = V_LINEAL/FPS            # Metros por fotograma
@@ -136,6 +162,7 @@ tic = time.time()
 # Localización inicial
 # llamar a funcion de localizacion para buqueda inicial
 # buscar en la region concreta e intentar que sea lo mas rapida posible
+localizacion(balizas, real, ideal, centro=P_INICIAL_IDEAL, radio=3, mostrar=MOSTRAR)
 
 tray_ideal = [ideal.pose()]  # Trayectoria percibida
 
@@ -161,10 +188,11 @@ for punto in objetivos:
       real.move_triciclo(w,v,LONGITUD)
     tray_real.append(real.pose())
 
+    # Decidir nueva localización ⇒ nuevo ideal
+    localizacion(balizas, real, ideal, centro=ideal.pose(), radio=0.5, step=0.1, mostrar=MOSTRAR)
 
     tray_ideal.append(ideal.pose())
 
-    # Decidir nueva localización ⇒ nuevo ideal
 
     if MOSTRAR:
       mostrar(objetivos, tray_ideal, tray_real)  # Representación gráfica
@@ -183,6 +211,12 @@ print(f"Recorrido: {espacio:.3f}m / {tiempo/FPS}s")
 print(f"Distancia real al objetivo final: {distanciaObjetivos[-1]:.3f}m")
 print(f"Suma de distancias a objetivos: {np.sum(distanciaObjetivos):.3f}m")
 print(f"Tiempo real invertido: {toc-tic:.3f}sg")
+
+desviacion = np.sum(np.abs(np.subtract(tray_real, tray_ideal)))
+print(f"Desviacion de las trayectorias: {desviacion:.3f}")
+
 if MOSTRAR:
   mostrar(objetivos, tray_ideal, tray_real)  # Representación gráfica
   input() # Pausa para ver la gráfica
+
+print(f"Resumen: {toc-tic:.3f} {desviacion:.3f} {np.sum(distanciaObjetivos):.3f}")
