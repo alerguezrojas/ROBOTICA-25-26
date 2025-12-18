@@ -3,6 +3,7 @@
 # Robótica Computacional
 # Grado en Ingeniería Informática (Cuarto)
 # Práctica 5: Localización de robots móviles.
+# Alejandro Rodríguez Rojas - alu0101317038@ull.edu.es
 
 import sys
 from math import *
@@ -82,12 +83,12 @@ def localizacion(balizas, real, ideal, centro, radio, step=0.1):
 # ******************************************************************************
 
 # Definición del robot y constantes
-P_INICIAL = [0., 4., 0.]        # Pose inicial real
+P_INICIAL = [-2., 2., 0.]        # Pose inicial real
 P_INICIAL_IDEAL = [2., 2., 0.]  # Pose inicial ideal
 V_LINEAL  = .7                  # m/s
 V_ANGULAR = 140.                # º/s
 FPS       = 10.                 # Hz
-MOSTRAR   = True                # Mostrar gráfica
+MOSTRAR   = False                # Mostrar gráfica
 
 HOLONOMICO = 1
 GIROPARADO = 0
@@ -98,14 +99,15 @@ trayectorias = [
     [[0,2],[4,2]],
     [[2,4],[4,0],[0,0]],
     [[2,4],[2,0],[0,2],[4,2]],
-    [[2+2*sin(.8*pi*i),2+2*cos(.8*pi*i)] for i in range(5)]
+    [[2+2*sin(.8*pi*i),2+2*cos(.8*pi*i)] for i in range(5)],
+    # Nueva trayectoria
+    [[-3,1], [4,-1], [0,2], [-2,-2], [2,4], [-1,4]]
 ]
 
-if len(sys.argv)<2 or int(sys.argv[1])<0 or int(sys.argv[1])>=len(trayectorias):
-    sys.exit(f"{sys.argv[0]} <indice entre 0 y {len(trayectorias)-1}>")
-objetivos = trayectorias[int(sys.argv[1])]
+# Ejecutar siempre la nueva trayectoria sin tener que indicarla por parámetro
+objetivos = trayectorias[5]
 
-balizas = [[0,0], [0,4], [4,0], [4,4]]
+balizas = [[-3,1], [4,-1], [0,2], [-2,-2], [2,4], [-1,4]]
 EPSILON = 0.15 
 V = V_LINEAL/FPS
 W = V_ANGULAR*pi/(180*FPS)
@@ -115,7 +117,7 @@ ideal.set_noise(0,0,0)
 ideal.set(*P_INICIAL_IDEAL)
 
 real = robot()
-real.set_noise(.01, .01, .1) 
+real.set_noise(.05, .05, .1) 
 real.set(*P_INICIAL)
 
 random.seed(0)
@@ -125,7 +127,7 @@ espacio = 0.
 tic = time.time()
 
 # --- LOCALIZACIÓN INICIAL (Búsqueda global) ---
-localizacion(balizas, real, ideal, centro=[2, 2], radio=3.0, step=0.2)
+localizacion(balizas, real, ideal, centro=[0, 0], radio=5.0, step=0.2)
 tray_ideal = [ideal.pose()]
 
 distanciaObjetivos = []
