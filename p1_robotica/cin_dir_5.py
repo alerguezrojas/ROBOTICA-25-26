@@ -7,7 +7,7 @@
 # Alejandro Rodríguez Rojas alu0101317038@ull.edu.es
 
 # Ejemplo:
-# ./cdDH.py 30 45
+# python3 cin_dir_5.py 30 45 0 20
 
 import sys
 from math import *
