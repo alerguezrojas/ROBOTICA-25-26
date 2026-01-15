@@ -102,12 +102,10 @@ class GimbalApp:
 
     def draw_camera(self, matrix, base_color='#94a3b8', lens_color='#3b82f6', alpha=1.0):
         """Renderiza el modelo 3D de la cámara."""
-        # Cuerpo
         box = np.array([
             [-0.3, -0.2, -0.2], [0.3, -0.2, -0.2], [0.3, 0.2, -0.2], [-0.3, 0.2, -0.2], [-0.3, -0.2, -0.2],
             [-0.3, -0.2, 0.2], [0.3, -0.2, 0.2], [0.3, 0.2, 0.2], [-0.3, 0.2, 0.2], [-0.3, -0.2, 0.2]
         ]).T
-        # Lente
         lens = np.array([
             [0, 0, 0.2], [0.15, 0.15, 0.5], [-0.15, 0.15, 0.5], [0, 0, 0.2],
             [0.15, -0.15, 0.5], [-0.15, -0.15, 0.5], [0, 0, 0.2]
@@ -139,7 +137,6 @@ class GimbalApp:
         """Dibuja comparativa de trayectorias (Cyan = SLERP, Naranja = Euler)."""
         if self.q_start is not None and self.q_end is not None:
             t_vals = np.linspace(0, 1, 60)
-            
             # Trayectoria SLERP (Alta Visibilidad)
             pts_slerp = []
             for t in t_vals:
@@ -163,10 +160,15 @@ class GimbalApp:
         # Estilo de widgets
         bg_ui = '#1e293b'
         
-        # Sliders
+        # Sliders con etiquetas blancas
         self.s_roll = Slider(plt.axes([0.35, 0.12, 0.45, 0.03], facecolor=bg_ui), 'Roll (X)', -180, 180, 0, color='#ec4899')
         self.s_pitch = Slider(plt.axes([0.35, 0.08, 0.45, 0.03], facecolor=bg_ui), 'Pitch (Y)', -90, 90, 0, color='#22c55e')
         self.s_yaw = Slider(plt.axes([0.35, 0.04, 0.45, 0.03], facecolor=bg_ui), 'Yaw (Z)', -180, 180, 0, color='#06b6d4')
+
+        # Cambiar color de etiquetas y valores a blanco para legibilidad
+        for s in [self.s_roll, self.s_pitch, self.s_yaw]:
+            s.label.set_color('white')
+            s.valtext.set_color('white')
 
         # Controles laterales
         ax_radio = plt.axes([0.02, 0.72, 0.18, 0.12], facecolor='#0f172a')
